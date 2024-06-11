@@ -1,4 +1,4 @@
-# Script for plotting Error rate and count of Fragment Size.
+# Script for plotting Error rate and count of Fragment Size with Mono- and Di-Chromatosome indication.
 
 library(tidyverse)
 library(ggplot2)
