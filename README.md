@@ -7,6 +7,12 @@ Through our bachelor's project (Bachelor of Data Science), we've gotten the oppo
 - DREAMS: deep read-level error model for sequencing data applied to low-frequency variant calling and circulating tumor DNA detection. MBC. By Christensen et al. 2023
 - Error-Corrected Deep Targeted Sequencing of Circulating Cell-Free DNA from Colorectal Cancer Patients for Sensitive Detection of Circulating Tumor DNA. MDPI. By Frydendahl et al. 2024. 
 
+## About The Project
+Circulating tumor DNA (ctDNA) is released from cancer cells into the bloodstream and constitutes a fraction of the total circulating cell-free DNA (cfDNA) in cancer patients. ctDNA measurements can therefore be used to identify and characterize tumors. Due to its short half-life, ctDNA is also ideal for monitoring treatment response and follow-up in cancer patients. However, the fraction of ctDNA in the blood is often very small, making it challenging to distinguish cancer mutations from somatic mutations that have no clinical significance.
+In this project, we are working to optimize an error model, in the form of a neural network, that can distinguish cancer-specific mutations from Errors. Our work builds on the DREAMS method, which uses a neural network for low-frequency variant calling and detection of ctDNA from sequencing data. Specifically, we focus on modeling segments of nucleotides that are inserted (insertion) or removed (deletion) from DNA. We successfully improved the sensitivity of cancer predictions by 4.75% at a specificity of 95%, corresponding to 21.6% of the detectable cases. This underscores the potential of developing accurate error models for use in the DREAMS setup to effectively detect cancer.
+
+For a detailed report see the PDF "Bachelor Project".
+
 ## Installation
 
 You can install the development version of dreams from
