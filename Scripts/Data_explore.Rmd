@@ -1,0 +1,190 @@
+---
+title: "test"
+author: "Marcus"
+date: "February 2, 2024"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+# reticulate::use_condaenv("r_env", required = TRUE)
+library(tidyverse)
+# library(dreams)
+```
+
+```{r}
+data <- read_csv("~/ctdna_nn_F2024/data/training_data_indels.csv",
+                          name_repair = function(x) gsub("data\\.", "", x))
+```
+
+```{r}
+head(data)
+```
+
+```{r}
+unique(data$obs)
+```
+
+```{r}
+summary(as.factor(data$obs))
+```
+
+## test
+```{r}
+df <- c()
+df$data <- data[1:21]
+df$info <- data[22:25]
+head(df$data)
+```
+
+
+## qname:
+```{r}
+# Regular expression pattern to match everything before the first underscore
+pattern <- '([^_]*)_.+'
+Donors <- sapply(df$data$qname, function(x) sub(pattern, '\\1', x))
+```
+
+```{r}
+unique(Donors)
+```
+
+```{r}
+length(unique(Donors))
+```
+
+```{r}
+summary(as.factor(Donors))
+```
+
+```{r}
+summary(as.factor(Donors[1:2644948]))
+```
+
+
+## chr:
+```{r}
+unique(df$chr)
+```
+
+Vores bedste ud er at dette er kromosomer.
+
+## obs:
+```{r}
+unique(df$obs)
+```
+
+## insertions and deletions:
+```{r}
+summary(df$n_insertions_in_read); summary(df$n_deletions_in_read)
+```
+
+## UMI count. 
+```{r}
+summary(df$umi_count)
+```
+
+OBS! NA's
+```{r}
+colSums(is.na(df))[colSums(is.na(df)) > 0]
+```
+
+## Small pilot sample
+
+```{r}
+n = 1000 # sample size
+pilot_data <- df$data[sample(nrow(df$data), n, replace = F),]
+
+pilot_data
+```
+
+
+
+## Data 80/20 split first iter ##### obs !!! 2644948 er med i begge
+```{r}
+data80 <- data[1:2644948,] # read_csv("~/ctdna_nn_F2024/data/training_data_indels.csv")
+data20 <- data[2644948:3300320,] # read_csv("~/ctdna_nn_F2024/data/test_data_indels.csv")
+training_data <- c(); test_data <- c()
+training_data$data <- data80[1:21]; test_data$data <- data20[1:21]
+training_data$info <- data[22:25]; test_data$info <- data[22:25]
+```
+
+```{r}
+data80 <- read_csv("~/ctdna_nn_F2024/data/training_data80_indels.csv")
+data20 <- read_csv("~/ctdna_nn_F2024/data/test_data20_indels.csv")
+```
+
+```{r, eval=FALSE}
+write_csv(data80, "~/ctdna_nn_F2024/data/training_data80_indels.csv")
+write_csv(data20, "~/ctdna_nn_F2024/data/test_data20_indels.csv")
+```
+
+```{r}
+summary(as.factor(data20$obs))
+summary(as.factor(data80$obs))
+```
+
+## model
+```{r}
+library(rhdf5)
+model <- rhdf5::H5Fopen("~/ctdna_nn_F2024/Models/test_model.hdf5")
+```
+
+```{r}
+predict(model, pilot_data)
+```
+
+## Hit ratio
+```{r}
+pred_0 <- read_csv("~/ctdna_nn_F2024/Models/init_model_pred.csv")
+pred_1 <- read_csv("~/ctdna_nn_F2024/Models/init_model_pred_1.csv")
+head(pred_0[-1])
+```
+
+```{r}
+(col_max <- apply(pred_0[-1][1:5,], 1, which.max))
+```
+
+```{r}
+hit_R <- function(a, true){
+  hit=0
+  for (i in 1:length(a)){
+    if (a[i] == 3 & true[i]=="I"){hit=hit+1}
+    if (a[i] == 2 & true[i]=="D"){hit=hit+1}
+    if (a[i] == 1 & (true[i]%in% c("A", "T", "C", "G"))){hit=hit+1}
+  }
+  return(hit/length(true))
+}
+```
+
+```{r}
+col_max_0 <- apply(pred_0[-1], 1, which.max)
+col_max_1 <- apply(pred_1[-1], 1, which.max)
+```
+
+```{r}
+col_max_0 %>% 
+  as.factor() %>% 
+  summary()
+```
+
+```{r}
+col_max_1 %>% 
+  as.factor() %>% 
+  summary()
+```
+
+```{r}
+hit_R(col_max_0, data20$obs)
+```
+
+```{r}
+hit_R(col_max_1, data20$obs)
+```
+
+## Read model
+```{r}
+library(keras)
+library(tensorflow)
+model <- load_model_hdf5("~/ctdna_nn_F2024/Models/test_model.hdf5")
+```

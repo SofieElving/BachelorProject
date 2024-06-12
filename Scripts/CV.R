@@ -15,10 +15,6 @@ df$info <- data[22:25]
 pattern <- '([^_]*)_.+'
 Donors <- sapply(df$data$qname, function(x) sub(pattern, '\\1', x))
 
-
-# Create 5 folds of donors
-folds <- createFolds(Donors, k = 5, list = TRUE, returnTrain = FALSE)
-
 # Find unique patients
 unique_patients <- unique(Donors)
 
